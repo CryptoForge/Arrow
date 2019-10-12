@@ -23,6 +23,10 @@ public:
 
 static const CRPCConvertParam vRPCConvertParams[] =
 {
+    { "getalldata", 0},
+    { "getalldata", 1},
+    { "getalldata", 2},
+    { "getalldata", 3},
     { "stop", 0 },
     { "setmocktime", 0 },
     { "getaddednodeinfo", 0 },
@@ -142,6 +146,26 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "z_getpaymentdisclosure", 1},
     { "z_getpaymentdisclosure", 2},
     { "z_setmigration", 0},
+    { "zs_listtransactions", 0},
+    { "zs_listtransactions", 1},
+    { "zs_listtransactions", 2},
+    { "zs_listtransactions", 3},
+    { "zs_listtransactions", 4},
+    { "zs_listsentbyaddress", 1},
+    { "zs_listsentbyaddress", 2},
+    { "zs_listsentbyaddress", 3},
+    { "zs_listsentbyaddress", 4},
+    { "zs_listsentbyaddress", 5},
+    { "zs_listreceivedbyaddress", 1},
+    { "zs_listreceivedbyaddress", 2},
+    { "zs_listreceivedbyaddress", 3},
+    { "zs_listreceivedbyaddress", 4},
+    { "zs_listreceivedbyaddress", 5},
+    { "zs_listspentbyaddress", 1},
+    { "zs_listspentbyaddress", 2},
+    { "zs_listspentbyaddress", 3},
+    { "zs_listspentbyaddress", 4},
+    { "zs_listspentbyaddress", 5},
 };
 
 class CRPCConvertTable
