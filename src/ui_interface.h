@@ -81,6 +81,12 @@ public:
     /** Progress message during initialization. */
     boost::signals2::signal<void (const std::string &message)> InitMessage;
 
+    /** Additional Info Message. */
+    boost::signals2::signal<void (const std::string &message)> WitnessInfoMessage;
+
+    /** Transaction Delete Info Message. */
+    boost::signals2::signal<void (const std::string &message)> DeleteInfoMessage;
+
     /** Number of network connections changed. */
     boost::signals2::signal<void (int newNumConnections)> NotifyNumConnectionsChanged;
 

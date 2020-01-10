@@ -1773,7 +1773,8 @@ UniValue gettransaction(const UniValue& params, bool fHelp)
 
     UniValue entry(UniValue::VOBJ);
     if (!pwalletMain->mapWallet.count(hash))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid or non-wallet transaction id");
+        return entry;
+        //throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid or non-wallet transaction id");
     const CWalletTx& wtx = pwalletMain->mapWallet[hash];
 
     CAmount nCredit = wtx.GetCredit(filter);

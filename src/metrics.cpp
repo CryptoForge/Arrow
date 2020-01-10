@@ -83,6 +83,8 @@ static boost::synchronized_value<std::list<uint256>> trackedBlocks;
 
 static boost::synchronized_value<std::list<std::string>> messageBox;
 static boost::synchronized_value<std::string> initMessage;
+static boost::synchronized_value<std::string> witnessInfoMessage;
+static boost::synchronized_value<std::string> deleteInfoMessage;
 static bool loaded = false;
 
 extern int64_t GetNetworkHashPS(int lookup, int height);
@@ -184,6 +186,16 @@ static void metrics_InitMessage(const std::string& message)
     *initMessage = message;
 }
 
+static void metrics_WitnessInfoMessage(const std::string& message)
+{
+    *witnessInfoMessage = message;
+}
+
+static void metrics_DeleteInfoMessage(const std::string& message)
+{
+    *deleteInfoMessage = message;
+}
+
 void ConnectMetricsScreen()
 {
     uiInterface.ThreadSafeMessageBox.disconnect_all_slots();
@@ -192,6 +204,10 @@ void ConnectMetricsScreen()
     uiInterface.ThreadSafeQuestion.connect(metrics_ThreadSafeQuestion);
     uiInterface.InitMessage.disconnect_all_slots();
     uiInterface.InitMessage.connect(metrics_InitMessage);
+    uiInterface.WitnessInfoMessage.disconnect_all_slots();
+    uiInterface.WitnessInfoMessage.connect(metrics_WitnessInfoMessage);
+    uiInterface.DeleteInfoMessage.disconnect_all_slots();
+    uiInterface.DeleteInfoMessage.connect(metrics_DeleteInfoMessage);
 }
 
 int printStats(bool mining)
@@ -205,7 +221,7 @@ int printStats(bool mining)
     size_t connections;
     int64_t netsolps;
     {
-        LOCK2(cs_main, cs_vNodes);
+        //LOCK2(cs_main, cs_vNodes);
         height = chainActive.Height();
         currentHeadersHeight = pindexBestHeader ? pindexBestHeader->nHeight: -1;
         currentHeadersTime = pindexBestHeader ? pindexBestHeader->nTime : 0;
@@ -413,6 +429,38 @@ int printInitMessage()
     return 2;
 }
 
+int printWitnessInfo()
+{
+    int lines = 2;
+
+    std::string msg = *witnessInfoMessage;
+
+    if (msg == _("")) {
+      lines = 0;
+    } else {
+      std::cout << _("Witness Info:") << " " << msg << std::endl;
+      std::cout << std::endl;
+    }
+
+    return lines;
+}
+
+int printDeleteInfo()
+{
+    int lines = 2;
+
+    std::string msg = *deleteInfoMessage;
+
+    if (msg == _("")) {
+      lines = 0;
+    } else {
+      std::cout << _("Delete Info:") << " " << msg << std::endl;
+      std::cout << std::endl;
+    }
+
+    return lines;
+}
+
 #ifdef WIN32
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 
@@ -500,14 +548,19 @@ void ThreadShowMetricsScreen()
 #else
         bool mining = false;
 #endif
+        int extraInfoLines = printWitnessInfo();
+        extraInfoLines += printDeleteInfo();
+        lines += extraInfoLines;
 
-        if (loaded) {
-            lines += printStats(mining);
-            lines += printMiningStatus(mining);
+        if (extraInfoLines == 0) {
+          if (loaded) {
+              lines += printStats(mining);
+              lines += printMiningStatus(mining);
+          }
+          lines += printMetrics(cols, mining);
+          lines += printMessageBox(cols);
+          lines += printInitMessage();
         }
-        lines += printMetrics(cols, mining);
-        lines += printMessageBox(cols);
-        lines += printInitMessage();
 
         if (isScreen) {
             // Explain how to exit

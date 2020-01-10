@@ -408,6 +408,10 @@ std::string HelpMessage(HelpMessageMode mode)
     strUsage += HelpMessageOpt("-keypool=<n>", strprintf(_("Set key pool size to <n> (default: %u)"), 100));
     strUsage += HelpMessageOpt("-migration", _("Enable the Sprout to Sapling migration"));
     strUsage += HelpMessageOpt("-migrationdestaddress=<zaddr>", _("Set the Sapling migration address"));
+    strUsage += HelpMessageOpt("-consolidation", _("Enable Auto Sapling Note consolidation"));
+    strUsage += HelpMessageOpt("-deletetx", _("Enable Old Transaction Deletion"));
+    strUsage += HelpMessageOpt("-keeptxnum", strprintf(_("Keep the last <n> transactions (default: %i)"), DEFAULT_TX_RETENTION_LASTTX));
+    strUsage += HelpMessageOpt("-keeptxfornblocks", strprintf(_("Keep transactions for at least <n> blocks (default: %i)"), DEFAULT_TX_RETENTION_BLOCKS));
     if (showDebug)
         strUsage += HelpMessageOpt("-mintxfee=<amt>", strprintf("Fees (in %s/kB) smaller than this are considered zero fee for transaction creation (default: %s)",
             CURRENCY_UNIT, FormatMoney(CWallet::minTxFee.GetFeePerK())));
@@ -1705,6 +1709,14 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         // Set sapling migration status
         pwalletMain->fSaplingMigrationEnabled = GetBoolArg("-migration", false);
 
+        //Set Sapling Consolidation
+        pwalletMain->fSaplingConsolidationEnabled = GetBoolArg("-consolidation", false);
+
+        //Set Transaction Deletion Options
+        fTxDeleteEnabled = GetBoolArg("-deletetx", false);
+        fKeepLastNTransactions = GetArg("-keeptxnum", DEFAULT_TX_RETENTION_LASTTX);
+        fDeleteTransactionsAfterNBlocks = GetArg("-keeptxfornblocks", DEFAULT_TX_RETENTION_BLOCKS);
+
         if (fFirstRun)
         {
             // Create new keyUser and set as default key
@@ -1903,6 +1915,11 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (pwalletMain) {
         // Add wallet transactions that aren't already in a block to mapTransactions
         pwalletMain->ReacceptWalletTransactions();
+
+        if (fTxDeleteEnabled) {
+          //Run Transaction Deleted
+          pwalletMain->DeleteWalletTransactions(chainActive.Tip(), true);
+        }
 
         // Run a thread to flush wallet periodically
         threadGroup.create_thread(boost::bind(&ThreadFlushWalletDB, boost::ref(pwalletMain->strWalletFile)));
